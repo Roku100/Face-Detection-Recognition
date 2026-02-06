@@ -1,0 +1,54 @@
+# Face Detection & Recognition Configuration
+
+# Detection settings
+detection:
+  method: "dnn"  # Options: haar, dnn, mtcnn
+  confidence_threshold: 0.5
+  scale_factor: 1.1  # For Haar cascades
+  min_neighbors: 5   # For Haar cascades
+  min_face_size: [30, 30]
+  
+# Recognition settings
+recognition:
+  model: "hog"  # Options: hog, cnn (cnn is more accurate but slower)
+  tolerance: 0.6  # Lower is more strict
+  num_jitters: 1  # Higher is more accurate but slower
+  
+# Video processing
+video:
+  frame_skip: 2  # Process every Nth frame
+  display_fps: true
+  max_fps: 30
+  
+# Face registration
+registration:
+  min_samples: 5  # Minimum face samples per person
+  auto_capture_interval: 0.5  # Seconds between auto-captures
+  quality_threshold: 0.7  # Minimum face quality score
+  
+# Database
+database:
+  path: "data/encodings/face_database.db"
+  backup_enabled: true
+  
+# Performance
+performance:
+  use_gpu: false
+  batch_size: 10
+  enable_tracking: true  # Use object tracking to reduce detection calls
+  
+# Display
+display:
+  show_confidence: true
+  show_fps: true
+  bbox_thickness: 2
+  font_scale: 0.6
+  known_color: [0, 255, 0]    # Green for known faces
+  unknown_color: [0, 0, 255]  # Red for unknown faces
+  
+# Paths
+paths:
+  known_faces: "data/known_faces"
+  encodings: "data/encodings"
+  models: "data/models"
+  logs: "logs"

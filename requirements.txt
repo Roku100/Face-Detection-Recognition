@@ -1,0 +1,23 @@
+# Core dependencies for Face Detection & Recognition
+# Python 3.12 compatible
+
+# OpenCV for computer vision
+opencv-python==4.8.1.78
+opencv-contrib-python==4.8.1.78
+
+# Face recognition (professional library)
+face-recognition==1.3.0
+dlib==19.24.2
+
+# Core libraries
+numpy==1.24.3
+Pillow==10.1.0
+
+# Configuration and utilities
+PyYAML==6.0.1
+colorama==0.4.6
+tqdm==4.66.1
+
+# Optional: Deep learning for MTCNN
+# mtcnn==0.1.1
+# tensorflow==2.15.0

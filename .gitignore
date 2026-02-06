@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+venv312/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project specific
+data/encodings/*.db
+data/encodings/*.json
+data/encodings/backups/
+*.jpg
+*.png
+*.mp4
+!data/models/*.caffemodel
+
+# OS
+.DS_Store
+Thumbs.db
