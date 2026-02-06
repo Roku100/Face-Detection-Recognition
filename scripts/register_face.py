@@ -165,11 +165,11 @@ class FaceRegistration:
                 # Handle keyboard
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord('q'):
-                    print("\n✗ Registration cancelled")
+                    print("\n[CANCELLED] Registration cancelled")
                     return False
                 elif key == ord('c') and encoding is not None:
                     encodings.append(encoding)
-                    print(f"  ✓ Manual capture {len(encodings)}/{self.min_samples}")
+                    print(f"  [AUTO] Manual capture {len(encodings)}/{self.min_samples}")
         
         finally:
             cap.release()
@@ -181,10 +181,10 @@ class FaceRegistration:
                 self.database.add_person(name, encoding)
             
             self.database.save_database()
-            print(f"\n✓ Successfully registered {name} with {len(encodings)} encoding(s)")
+            print(f"\n[SUCCESS] Successfully registered {name} with {len(encodings)} encoding(s)")
             return True
         else:
-            print(f"\n✗ Failed: Need at least {self.min_samples} samples")
+            print(f"\n[FAILED] Failed: Need at least {self.min_samples} samples")
             return False
     
     def list_registered_people(self):
@@ -206,10 +206,10 @@ class FaceRegistration:
         """Remove a person from database."""
         if self.database.remove_person(name):
             self.database.save_database()
-            print(f"✓ Removed {name} from database")
+            print(f"[SUCCESS] Removed {name} from database")
             return True
         else:
-            print(f"✗ {name} not found in database")
+            print(f"[FAILED] {name} not found in database")
             return False
 
 def main():

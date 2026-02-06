@@ -61,25 +61,25 @@ class FaceEncoder:
         return encoding
     
     def _compute_lbp(self, image):
-        # TODO: could optimize this with vectorization
+        # Optimized LBP using numpy vectorization for better performance
         height, width = image.shape
-        lbp = np.zeros_like(image)
+        lbp = np.zeros((height - 2, width - 2), dtype=np.uint8)
         
-        for i in range(1, height-1):
-            for j in range(1, width-1):
-                center = image[i, j]
-                code = 0
-                code |= (image[i-1, j-1] >= center) << 7
-                code |= (image[i-1, j] >= center) << 6
-                code |= (image[i-1, j+1] >= center) << 5
-                code |= (image[i, j+1] >= center) << 4
-                code |= (image[i+1, j+1] >= center) << 3
-                code |= (image[i+1, j] >= center) << 2
-                code |= (image[i+1, j-1] >= center) << 1
-                code |= (image[i, j-1] >= center) << 0
-                lbp[i, j] = code
+        # Center pixel
+        center = image[1:-1, 1:-1]
         
-        return lbp
+        # Binary comparison for each neighbor
+        lbp |= ((image[0:-2, 0:-2] >= center) << 7).astype(np.uint8)
+        lbp |= ((image[0:-2, 1:-1] >= center) << 6).astype(np.uint8)
+        lbp |= ((image[0:-2, 2:] >= center) << 5).astype(np.uint8)
+        lbp |= ((image[1:-1, 2:] >= center) << 4).astype(np.uint8)
+        lbp |= ((image[2:, 2:] >= center) << 3).astype(np.uint8)
+        lbp |= ((image[2:, 1:-1] >= center) << 2).astype(np.uint8)
+        lbp |= ((image[2:, 0:-2] >= center) << 1).astype(np.uint8)
+        lbp |= ((image[1:-1, 0:-2] >= center) << 0).astype(np.uint8)
+        
+        # Padding back to original size
+        return np.pad(lbp, 1, mode='constant')
     
     def encode_faces(self, image):
         if len(image.shape) == 3:

@@ -16,12 +16,12 @@ from utils.drawer import FaceDrawer
 from utils.image_processor import ImageProcessor
 
 class FaceTracker:
-    def __init__(self, history_size=5, iou_threshold=0.5):
+    def __init__(self, history_size=10, iou_threshold=0.4):
         self.tracks = {}
         self.next_id = 0
         self.history_size = history_size
         self.iou_threshold = iou_threshold
-        self.max_age = 10
+        self.max_age = 15 # increased age for better persistence
     
     def _calculate_iou(self, bbox1, bbox2):
         x1, y1, w1, h1 = bbox1
@@ -69,32 +69,41 @@ class FaceTracker:
                 track['age'] = 0
                 matched_tracks.add(best_track_id)
                 
-                if name and is_known:
+                # Update name votes (only if confidence is decent)
+                if is_known and confidence > 0.4:
                     if name not in track['name_votes']:
                         track['name_votes'][name] = deque(maxlen=self.history_size)
                     track['name_votes'][name].append(confidence)
                 
+                # Get most stable name
                 if track['name_votes']:
-                    best_name = max(track['name_votes'].items(), 
-                                  key=lambda x: (len(x[1]), np.mean(x[1])))
-                    stable_name = best_name[0]
-                    stable_confidence = np.mean(best_name[1])
+                    # Sort names by both count and average confidence
+                    best_name_data = max(track['name_votes'].items(), 
+                                       key=lambda x: (len(x[1]), np.mean(x[1])))
+                    
+                    # Minimum samples check to prevent early flickering
+                    if len(best_name_data[1]) >= 3:
+                        stable_name = best_name_data[0]
+                        stable_confidence = np.mean(best_name_data[1])
+                    else:
+                        stable_name = name
+                        stable_confidence = confidence
                 else:
                     stable_name = "Unknown"
                     stable_confidence = confidence
                 
                 results.append((bbox, stable_name, stable_confidence, stable_name != "Unknown"))
             else:
+                # New track
                 track_id = self.next_id
                 self.next_id += 1
                 
                 self.tracks[track_id] = {
                     'bbox': bbox,
-                    'name_votes': {name: deque([confidence], maxlen=self.history_size)} if name and is_known else {},
+                    'name_votes': {name: deque([confidence], maxlen=self.history_size)} if is_known else {},
                     'age': 0
                 }
                 matched_tracks.add(track_id)
-                
                 results.append((bbox, name, confidence, is_known))
         
         return results
@@ -112,9 +121,9 @@ class FaceRecognitionSystem:
         self.image_processor = ImageProcessor()
         self.tracker = FaceTracker(history_size=5, iou_threshold=0.5)
         
-        print(f"✓ Face Recognition System initialized")
-        print(f"✓ Using {self.detector.get_name()} for detection")
-        print(f"✓ Database: {len(self.database.get_person_names())} people registered")
+        print(f"[SUCCESS] Face Recognition System initialized")
+        print(f"[INFO] Using {self.detector.get_name()} for detection")
+        print(f"[DB] Database: {len(self.database.get_person_names())} people registered")
     
     def process_image(self, image_path, output_path=None, show=True):
         image = self.image_processor.load_image(image_path)
@@ -131,20 +140,20 @@ class FaceRecognitionSystem:
                 name, rec_confidence = self.matcher.match_face(encoding)
                 
                 if name:
-                    print(f"  ✓ Recognized: {name} (confidence: {rec_confidence:.2f})")
+                    print(f"  [MATCH] Recognized: {name} (confidence: {rec_confidence:.2f})")
                     results.append((bbox, name, rec_confidence, True))
                 else:
-                    print(f"  ? Unknown face")
+                    print(f"  [?] Unknown face")
                     results.append((bbox, "Unknown", det_confidence, False))
             else:
-                print(f"  ✗ Could not encode face")
+                print(f"  [X] Could not encode face")
                 results.append((bbox, "Unknown", det_confidence, False))
         
         output_image = self.drawer.draw_multiple_faces(image, results)
         
         if output_path:
             cv2.imwrite(output_path, output_image)
-            print(f"✓ Saved result to: {output_path}")
+            print(f"[SUCCESS] Saved result to: {output_path}")
         
         if show:
             cv2.imshow('Face Recognition', output_image)
@@ -176,7 +185,7 @@ class FaceRecognitionSystem:
         fps_counter = 0
         current_fps = 0
         
-        print("\n▶ Starting video processing...")
+        print("\n[START] Starting video processing...")
         print("Press 'q' to quit, 's' to save current frame")
         
         try:
@@ -228,14 +237,14 @@ class FaceRecognitionSystem:
                     timestamp = time.strftime('%Y%m%d_%H%M%S')
                     save_path = f"screenshot_{timestamp}.jpg"
                     cv2.imwrite(save_path, frame)
-                    print(f"✓ Saved screenshot: {save_path}")
+                    print(f"[SUCCESS] Saved screenshot: {save_path}")
         
         finally:
             cap.release()
             if writer:
                 writer.release()
             cv2.destroyAllWindows()
-            print("\n✓ Video processing stopped")
+            print("\n[INFO] Video processing stopped")
     
     def get_stats(self):
         db_stats = self.database.get_stats()
