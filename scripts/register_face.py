@@ -51,14 +51,14 @@ class FaceRegistration:
                     
                     if quality >= self.quality_threshold:
                         encodings.append(encoding)
-                        print(f"  ✓ Image {i}/{len(image_paths)}: Quality {quality:.2f}")
+                        print(f"  [OK] Image {i}/{len(image_paths)}: Quality {quality:.2f}")
                     else:
-                        print(f"  ✗ Image {i}/{len(image_paths)}: Low quality {quality:.2f}")
+                        print(f"  [LOW] Image {i}/{len(image_paths)}: Low quality {quality:.2f}")
                 else:
-                    print(f"  ✗ Image {i}/{len(image_paths)}: No face detected")
+                    print(f"  [X] Image {i}/{len(image_paths)}: No face detected")
             
             except Exception as e:
-                print(f"  ✗ Image {i}/{len(image_paths)}: Error - {e}")
+                print(f"  [ERR] Image {i}/{len(image_paths)}: Error - {e}")
         
         # Save to database
         if len(encodings) >= self.min_samples:
@@ -66,10 +66,10 @@ class FaceRegistration:
                 self.database.add_person(name, encoding)
             
             self.database.save_database()
-            print(f"\n✓ Successfully registered {name} with {len(encodings)} encoding(s)")
+            print(f"\n[SUCCESS] Successfully registered {name} with {len(encodings)} encoding(s)")
             return True
         else:
-            print(f"\n✗ Failed: Need at least {self.min_samples} good quality images")
+            print(f"\n[FAILED] Failed: Need at least {self.min_samples} samples")
             print(f"  Only got {len(encodings)} valid encoding(s)")
             return False
     

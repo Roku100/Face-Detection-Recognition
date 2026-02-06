@@ -24,7 +24,7 @@ video:
 registration:
   min_samples: 5  # Minimum face samples per person
   auto_capture_interval: 0.5  # Seconds between auto-captures
-  quality_threshold: 0.7  # Minimum face quality score
+  quality_threshold: 0.6  # Minimum face quality score
   
 # Database
 database:
